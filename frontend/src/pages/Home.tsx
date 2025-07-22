@@ -404,10 +404,11 @@ export default function Home() {
       );
     }
 
-    // Convert streak dates to the format expected by StreakHeatmap
-    const heatmapData = streakData?.streakDates?.map(date => ({
-      date,
-      value: 1
+    // Convert streak data to the format expected by StreakHeatmap
+    const heatmapData = streakData?.streakData?.map(item => ({
+      date: item.date,
+      value: item.value,
+      activities: item.activities
     })) || [];
 
     return <StreakHeatmap data={heatmapData} />;

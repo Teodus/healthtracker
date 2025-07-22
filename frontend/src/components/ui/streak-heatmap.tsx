@@ -1,7 +1,16 @@
 import { cn } from '@/lib/utils';
 
 interface StreakHeatmapProps {
-  data: { date: string; value: number }[]; // value 0-4 for intensity
+  data: { 
+    date: string; 
+    value: number;
+    activities?: {
+      foodLogged: boolean;
+      workoutCompleted: boolean;
+      habitsCompleted: number;
+      totalHabits: number;
+    };
+  }[]; // value 0-4 for intensity
   className?: string;
 }
 
@@ -56,7 +65,7 @@ export function StreakHeatmap({ data, className }: StreakHeatmapProps) {
   return (
     <div className={cn("p-4", className)}>
       {/* GitHub-style grid: weeks as columns, days as rows */}
-      <div className="flex gap-0.5 overflow-x-auto">
+      <div className="flex gap-0.5 overflow-x-auto mb-3">
         {weeks.map((week, weekIndex) => (
           <div key={weekIndex} className="flex flex-col gap-0.5">
             {week.map((day, dayIndex) => (
@@ -66,11 +75,34 @@ export function StreakHeatmap({ data, className }: StreakHeatmapProps) {
                   "w-2.5 h-2.5 rounded-sm transition-colors duration-200 hover:ring-1 hover:ring-primary/50",
                   getIntensityClass(day.value)
                 )}
-                title={day.date ? `${day.date}: ${day.value > 0 ? 'Active' : 'No activity'}` : ''}
+                title={
+                  day.date 
+                    ? `${day.date}: ${
+                        day.value === 0 
+                          ? 'No activity' 
+                          : day.activities 
+                            ? `${day.activities.foodLogged ? '🍎' : ''}${day.activities.workoutCompleted ? '💪' : ''}${day.activities.habitsCompleted > 0 ? `✓(${day.activities.habitsCompleted}/${day.activities.totalHabits})` : ''}`
+                            : 'Active'
+                      }`
+                    : ''
+                }
               />
             ))}
           </div>
         ))}
+      </div>
+      
+      {/* Legend */}
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>Less</span>
+        <div className="flex gap-1 items-center">
+          <div className={cn("w-2.5 h-2.5 rounded-sm", "bg-muted/20")} />
+          <div className={cn("w-2.5 h-2.5 rounded-sm", "bg-primary/20")} />
+          <div className={cn("w-2.5 h-2.5 rounded-sm", "bg-primary/40")} />
+          <div className={cn("w-2.5 h-2.5 rounded-sm", "bg-primary/60")} />
+          <div className={cn("w-2.5 h-2.5 rounded-sm", "bg-primary/80")} />
+        </div>
+        <span>More</span>
       </div>
     </div>
   );

@@ -60,7 +60,17 @@ export interface DailyStats {
 export interface StreakData {
   currentStreak: number;
   longestStreak: number;
-  streakDates: string[];
+  totalActiveDays: number;
+  streakData: Array<{
+    date: string;
+    value: number;
+    activities: {
+      foodLogged: boolean;
+      workoutCompleted: boolean;
+      habitsCompleted: number;
+      totalHabits: number;
+    };
+  }>;
 }
 
 class HealthService {
@@ -159,14 +169,16 @@ class HealthService {
       return response || {
         currentStreak: 0,
         longestStreak: 0,
-        streakDates: []
+        totalActiveDays: 0,
+        streakData: []
       };
     } catch (error) {
       // Return empty streak data if none exists
       return {
         currentStreak: 0,
         longestStreak: 0,
-        streakDates: []
+        totalActiveDays: 0,
+        streakData: []
       };
     }
   }

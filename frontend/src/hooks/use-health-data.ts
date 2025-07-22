@@ -59,10 +59,42 @@ export function useDeleteFoodEntry() {
   
   return useMutation({
     mutationFn: (id: string) => healthService.deleteFoodEntry(id),
+    onMutate: async (deletedId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.foodEntries });
+      
+      // Snapshot the previous value
+      const previousEntries = queryClient.getQueryData(QUERY_KEYS.foodEntries);
+      
+      // Optimistically update by removing the deleted item
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.foodEntries },
+        (old: FoodEntry[] | undefined) => {
+          if (!old) return [];
+          return old.filter(entry => entry.id !== deletedId);
+        }
+      );
+      
+      // Return a context object with the snapshotted value
+      return { previousEntries };
+    },
+    onError: (err, deletedId, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousEntries) {
+        queryClient.setQueryData(QUERY_KEYS.foodEntries, context.previousEntries);
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete food entry",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.foodEntries });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dailyStats });
+    },
     onSuccess: () => {
-      // Immediately refetch for smooth UI update
-      queryClient.refetchQueries({ queryKey: QUERY_KEYS.foodEntries });
-      queryClient.refetchQueries({ queryKey: QUERY_KEYS.dailyStats });
       toast({
         title: "Food entry deleted",
         description: "The food entry has been removed",
@@ -121,10 +153,42 @@ export function useDeleteWorkout() {
   
   return useMutation({
     mutationFn: (id: string) => healthService.deleteWorkout(id),
+    onMutate: async (deletedId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.workouts });
+      
+      // Snapshot the previous value
+      const previousWorkouts = queryClient.getQueryData(QUERY_KEYS.workouts);
+      
+      // Optimistically update by removing the deleted item
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.workouts },
+        (old: Workout[] | undefined) => {
+          if (!old) return [];
+          return old.filter(workout => workout.id !== deletedId);
+        }
+      );
+      
+      // Return a context object with the snapshotted value
+      return { previousWorkouts };
+    },
+    onError: (err, deletedId, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousWorkouts) {
+        queryClient.setQueryData(QUERY_KEYS.workouts, context.previousWorkouts);
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete workout",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workouts });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dailyStats });
+    },
     onSuccess: () => {
-      // Immediately refetch for smooth UI update
-      queryClient.refetchQueries({ queryKey: QUERY_KEYS.workouts });
-      queryClient.refetchQueries({ queryKey: QUERY_KEYS.dailyStats });
       toast({
         title: "Workout deleted",
         description: "The workout has been removed",
@@ -198,10 +262,56 @@ export function useDeleteHabit() {
   
   return useMutation({
     mutationFn: (id: string) => healthService.deleteHabit(id),
+    onMutate: async (deletedId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.habits });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.habitCompletions });
+      
+      // Snapshot the previous values
+      const previousHabits = queryClient.getQueryData(QUERY_KEYS.habits);
+      const previousCompletions = queryClient.getQueryData(QUERY_KEYS.habitCompletions);
+      
+      // Optimistically update habits by removing the deleted item
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.habits },
+        (old: Habit[] | undefined) => {
+          if (!old) return [];
+          return old.filter(habit => habit.id !== deletedId);
+        }
+      );
+      
+      // Also remove any completions for this habit
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.habitCompletions },
+        (old: any[] | undefined) => {
+          if (!old) return [];
+          return old.filter(completion => completion.habitId !== deletedId);
+        }
+      );
+      
+      // Return a context object with the snapshotted values
+      return { previousHabits, previousCompletions };
+    },
+    onError: (err, deletedId, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousHabits) {
+        queryClient.setQueryData(QUERY_KEYS.habits, context.previousHabits);
+      }
+      if (context?.previousCompletions) {
+        queryClient.setQueryData(QUERY_KEYS.habitCompletions, context.previousCompletions);
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete habit",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.habits });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.habitCompletions });
+    },
     onSuccess: () => {
-      // Immediately refetch for smooth UI update
-      queryClient.refetchQueries({ queryKey: QUERY_KEYS.habits });
-      queryClient.refetchQueries({ queryKey: QUERY_KEYS.habitCompletions });
       toast({
         title: "Habit deleted",
         description: "The habit has been removed",
