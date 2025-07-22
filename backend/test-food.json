@@ -1,0 +1,9 @@
+{
+  "name": "Chicken Salad",
+  "description": "Grilled chicken with mixed greens",
+  "calories": 350,
+  "protein": 35,
+  "carbs": 15,
+  "fat": 20,
+  "meal_type": "lunch"
+}

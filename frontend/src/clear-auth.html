@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Authentication</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .success {
+            color: #22c55e;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clear Authentication</h1>
+        <p>Click the button below to clear your authentication data and start fresh.</p>
+        <button onclick="clearAuth()">Clear Auth & Logout</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function clearAuth() {
+            // Clear all auth-related data
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('current_user');
+            
+            // Clear all localStorage (optional - uncomment if needed)
+            // localStorage.clear();
+            
+            // Show success message
+            document.getElementById('status').innerHTML = '<p class="success">✓ Authentication cleared successfully!<br>Redirecting to login page...</p>';
+            
+            // Redirect to auth page after 2 seconds
+            setTimeout(() => {
+                window.location.href = '/auth';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
